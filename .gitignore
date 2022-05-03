@@ -5,7 +5,7 @@
 Gemfile
 Gemfile.lock
 yarn.lock
-
+node_modules
 # Xcode
 #
 build/
