@@ -32,6 +32,26 @@ function App() {
     {id: 3, text: '투두리스트 만들어보기', done: false},
   ]);
 
+  //Math.max 함수는 입력값으로 받은 0개 이상의 숫자 중 가장 큰 숫자를 반환.
+  //즉 insert하면 새로운 id값을 추가하기 위함.
+  const onInsert = text => {
+    const nextId = todos.length > 0 ? Math.max(...todos.map(todo => todo.id)) + 1 : 1;
+    const todo = {
+      id: nextId,
+      text,
+      done: false,
+    };
+    setTodos(todos.concat(todo));
+  };
+
+  const onToggle = id => {
+    //todo.id와 매개변수 id의 값이 같으면 해당 todo의 done 값을 반대로 바꾼다.
+    const nextTodos = todos.map(todo =>
+      todo.id === id ? {...todo, done: !todo.done }  : todo,
+    );
+    setTodos(nextTodos);
+  };
+
   return (
     <SafeAreaProvider>
       {/*  safeArea를 bottom 하단 부분에만 적용한다는 의미*/}
@@ -41,8 +61,8 @@ function App() {
           behavior={Platform.select({ios: 'padding', android: undefined})}
           style={styles.avoid}>
           <DateHead date={today} />
-          {todos.length > 0 ? <TodoList todos={todos} /> : <Empty />}
-          <AddTodo />
+          {todos.length > 0 ? <TodoList todos={todos} onToggle={onToggle} /> : <Empty />}
+          <AddTodo onInsert={onInsert}  />
         </KeyboardAvoidingView>
       </SafeAreaView>
     </SafeAreaProvider>
