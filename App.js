@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -23,6 +23,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import AddTodo from './components/AddTodo';
 import Empty from './components/Empty';
 import TodoList from './components/TodoList';
+import todosStorages from './storages/todosStorages';
 
 function App() {
   const today = new Date();
@@ -32,10 +33,20 @@ function App() {
     {id: 3, text: '투두리스트 만들어보기', done: false},
   ]);
 
+  //.then(setTodos) 라고 코드를 작성했다. 데이터를 불러오고 나서 그 결과물을 setTodos의 함수인자로 넣어 호출하겠다는 의미이다.
+  useEffect(() => {
+    todosStorages.get().then(setTodos).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    todosStorages.set(todos).catch(console.error);
+  }, [todos]);
+
   //Math.max 함수는 입력값으로 받은 0개 이상의 숫자 중 가장 큰 숫자를 반환.
   //즉 insert하면 새로운 id값을 추가하기 위함.
   const onInsert = text => {
-    const nextId = todos.length > 0 ? Math.max(...todos.map(todo => todo.id)) + 1 : 1;
+    const nextId =
+      todos.length > 0 ? Math.max(...todos.map(todo => todo.id)) + 1 : 1;
     const todo = {
       id: nextId,
       text,
@@ -47,8 +58,13 @@ function App() {
   const onToggle = id => {
     //todo.id와 매개변수 id의 값이 같으면 해당 todo의 done 값을 반대로 바꾼다.
     const nextTodos = todos.map(todo =>
-      todo.id === id ? {...todo, done: !todo.done }  : todo,
+      todo.id === id ? {...todo, done: !todo.done} : todo,
     );
+    setTodos(nextTodos);
+  };
+
+  const onRemove = id => {
+    const nextTodos = todos.filter(todo => todo.id !== id);
     setTodos(nextTodos);
   };
 
@@ -61,8 +77,12 @@ function App() {
           behavior={Platform.select({ios: 'padding', android: undefined})}
           style={styles.avoid}>
           <DateHead date={today} />
-          {todos.length > 0 ? <TodoList todos={todos} onToggle={onToggle} /> : <Empty />}
-          <AddTodo onInsert={onInsert}  />
+          {todos.length > 0 ? (
+            <TodoList todos={todos} onToggle={onToggle} onRemove={onRemove} />
+          ) : (
+            <Empty />
+          )}
+          <AddTodo onInsert={onInsert} />
         </KeyboardAvoidingView>
       </SafeAreaView>
     </SafeAreaProvider>
